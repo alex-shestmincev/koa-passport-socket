@@ -15,7 +15,7 @@ process.on('uncaughtException', function(err) {
 gulp.task("nodemon", function(callback) {
   gp.nodemon({
     nodeArgs: ['--debug'],
-    script:   "index.js"
+    script:   "app.js"
     /* watch, ignore */
   });
 });

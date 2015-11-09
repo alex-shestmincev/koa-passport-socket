@@ -45,10 +45,9 @@ function socket(server) {
       socket.session = session;
 
       session.socketIds = session.socketIds ? session.socketIds.concat(socket.id) : [socket.id];
+      if (session.socketIds.length === 1) socket.broadcast.emit('server:userEnter', {name: socket.user.displayName});
 
       yield* sessionStore.save(sid, session);
-
-      socket.broadcast.emit('server:userEnter', {name: socket.user.displayName});
 
       socket.on('client:sendMessage', (message, clb) => {
         socket.broadcast.emit('server:messageSended', {
@@ -65,12 +64,11 @@ function socket(server) {
 
       socket.on('disconnect', function() {
 
-        socket.broadcast.emit('server:userLeft', {name: socket.user.displayName});
-
         co(function* clearSocketId() {
           var session = yield* sessionStore.get(sid, true);
           if (session) {
             session.socketIds.splice(session.socketIds.indexOf(socket.id), 1);
+            if (!session.socketIds.length) socket.broadcast.emit('server:userLeft', {name: socket.user.displayName});
             yield* sessionStore.save(sid, session);
           }
         }).catch(function(err) {
