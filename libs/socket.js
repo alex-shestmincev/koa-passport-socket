@@ -46,19 +46,25 @@ function socket(server) {
 
       session.socketIds = session.socketIds ? session.socketIds.concat(socket.id) : [socket.id];
       if (session.socketIds.length === 1) socket.broadcast.emit('server:userEnter', {name: socket.user.displayName});
-
       yield* sessionStore.save(sid, session);
+
+      socket.emit('server:connectUser', {
+        _id: socket.user._id,
+        name: socket.user.displayName,
+      });
 
       socket.on('client:sendMessage', (message, clb) => {
         socket.broadcast.emit('server:messageSended', {
+          _id: socket.user._id,
+          name: socket.user.displayName,
+          text: message
+        });
+        socket.emit('server:messageSended', {
+          _id: socket.user._id,
           name: socket.user.displayName,
           text: message
         });
 
-        socket.emit('server:myMessageSended', {
-          name: socket.user.displayName,
-          text: message
-        });
         if (clb) clb();
       })
 

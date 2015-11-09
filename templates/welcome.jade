@@ -29,6 +29,7 @@ html
 
   script.
     var socket = io();
+    var userStore = {};
 
     function showStatus(status, message) {
       document.querySelector('[data-status]').innerHTML = message || status;
@@ -45,6 +46,9 @@ html
 
     var elem = document.getElementById('chatarea');
 
+    socket.on('server:connectUser', function(userdata){
+      userStore = userdata;
+    });
 
 
     socket.on('server:myMessageSended', function(data){
@@ -53,7 +57,8 @@ html
     });
 
     socket.on('server:messageSended', function(data){
-      elem.innerHTML += "<p><b>" + data.name +"</b>: " + data.text + "</p>";
+      var sender = (data._id === userStore._id) ? 'me' : data.name;
+      elem.innerHTML += "<p><b>" + sender +"</b>: " + data.text + "</p>";
       elem.scrollTop = elem.scrollHeight;
     });
 
